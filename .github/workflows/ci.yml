@@ -5,23 +5,21 @@ on:
 jobs:
   # Reusable zig env:
   zig:
-    uses: ./.github/workflows/zig.yml
-  # # Testing job:
-  # tests:
-  #   needs: zig
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 1
-  #     - uses: actions/cache@v4
-  #       id: ci
-  #       with:
-  #         path: |
-  #           !~/.m2
-  #           ~/.zig
-  #         key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
-  #     - run: echo "${{ needs.zig.outputs.ZIG_BIN }}" >> "$GITHUB_PATH"
-  #     - run: zig version
-  #     - run: cd zig-01-hello && zig build --summary all
-  #     - run: cd zig-01-hello && ./zig-out/hello
+    uses: ./.github/workflows/zig.yml  # <--- (1) zig uses job is required
+  # Testing job:
+  tests:
+    needs: zig                         # <--- (2) needs of job zig is required
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/cache@v4         # <--- (3) same cache config is required
+        with:
+          path: |
+            ~/.zig
+            ~/.local
+          key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
+      - run: zig version
+      - run: cd zig-01-hello ; zig build --summary all
+      - run: cd zig-01-hello ; ./zig-out/bin/hello
