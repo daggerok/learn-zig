@@ -1,0 +1,5 @@
+.idea/
+.settings/
+zig-cache/
+zig-out/
+.DS_Store
