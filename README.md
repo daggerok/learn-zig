@@ -14,8 +14,8 @@ ln -sv ~/.dev/zig/zig ~/.bin/zig # or PATH=$HOME/.dev/zig:$PATH
 init project:
 
 ```bash
-mkdir zig-02-init
-cd zig-02-init
+mkdir my-zig-project
+cd my-zig-project
 zig init
 ```
 
@@ -24,4 +24,13 @@ testing:
 ```bash
 zig test src/main.zig
 zig test src/root.zig
+# or simply
+zig build test
+```
+
+build and run:
+
+```bash
+zig build # or: zig build --summary all
+❯ ./zig-out/bin/*
 ```
