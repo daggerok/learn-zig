@@ -7,6 +7,21 @@ jobs:
   zig:
     uses: ./.github/workflows/zig.yml  # <--- (1) zig uses job is required
   # Testing jobs:
+  test-zig-installation:
+    needs: zig                         # <--- (2) needs of job zig is required
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/cache@v4         # <--- (3) same cache config is required
+        with:
+          path: |
+            ~/.zig
+            ~/.local
+            ~/.cache/zig
+          key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
+      - run: zig version
   zig-01-hello:
     needs: zig                         # <--- (2) needs of job zig is required
     runs-on: ubuntu-latest
@@ -19,7 +34,27 @@ jobs:
           path: |
             ~/.zig
             ~/.local
+            ~/.cache/zig
           key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
-      - run: zig version
       - run: cd zig-01-hello ; zig build --summary all
       - run: cd zig-01-hello ; ./zig-out/bin/hello
+  zig-02-init:
+    needs: zig                         # <--- (2) needs of job zig is required
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/cache@v4         # <--- (3) same cache config is required
+        with:
+          path: |
+            ~/.zig
+            ~/.local
+            ~/.cache/zig
+          key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
+      - run: cd zig-02-init ; zig build --summary all
+      - run: cd zig-02-init ; ./zig-out/bin/*
+      - run: cd zig-02-init ; zig build test
+      - run: cd zig-02-init ; zig test src/main.zig
+      - run: cd zig-02-init ; zig test src/root.zig
+  

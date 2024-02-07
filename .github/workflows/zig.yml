@@ -24,6 +24,7 @@ jobs:
           path: |
             ~/.zig
             ~/.local
+            ~/.cache/zig
           key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
       - run: |
           PATH="$HOME/.zig:$PATH" command -v zig >/dev/null 2>&1 || {
@@ -35,6 +36,7 @@ jobs:
             export ZIG_VERSION=`${HOME}/.zig/zig version`                                   ;
             echo "Installed ${ZIG_VERSION} version of zig."                                 ;
           }
+          ${HOME}/.zig/zig env
       # set zig job outputs
       - id: bin
         run: echo "ZIG_BIN=${HOME}/.zig" >> $GITHUB_OUTPUT
@@ -54,5 +56,6 @@ jobs:
 #          path: |
 #            ~/.zig
 #            ~/.local
+#            ~/.cache/zig
 #          key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
 #      - run: zig version
