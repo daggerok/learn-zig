@@ -19,6 +19,7 @@ jobs:
           path: |
             ~/.zig
             ~/.local
+            ~/.cache/zig
           key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
       - run: zig version
       - run: cd zig-01-hello ; zig build --summary all
