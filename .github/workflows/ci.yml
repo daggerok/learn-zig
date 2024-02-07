@@ -6,7 +6,7 @@ jobs:
   # Reusable zig env:
   zig:
     uses: ./.github/workflows/zig.yml  # <--- (1) zig uses job is required
-  # Testing job:
+  # Testing jobs:
   zig-01-hello:
     needs: zig                         # <--- (2) needs of job zig is required
     runs-on: ubuntu-latest
