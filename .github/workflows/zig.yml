@@ -1,0 +1,71 @@
+name: zig
+on:
+  # Allows you to reuse local workflow from other repository GitHub Actions
+  workflow_call:
+    # Map the workflow outputs to job outputs
+    outputs:
+      ZIG_HOME:
+        description: "zig home directory"
+        value: ${{ jobs.zig.outputs.ZIG_HOME }}
+      ZIG_BIN:
+        description: "zig bin directory"
+        value: ${{ jobs.zig.outputs.ZIG_BIN }}
+jobs:
+  zig:
+    name: zig
+    runs-on: ubuntu-latest
+    # declare zig job outputs
+    outputs:
+      ZIG_HOME: ${{ steps.home.outputs.ZIG_HOME }}
+      ZIG_BIN: ${{ steps.bin.outputs.ZIG_BIN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/cache@v4
+        id: zig-cache
+        with:
+          path: |
+            !~/.m2
+            ~/.zig
+          key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
+      - run: |
+          PATH="$HOME/.zig:$PATH" command -v zig >/dev/null 2>&1 || {
+            echo >&2 "Zig is required but not installed."                                   ;
+            sudo apt install curl tar xz-utils -yqq                                             ;
+            curl -fsSL https://ziglang.org/builds/zig-linux-x86_64-0.11.0.tar.xz | tar -xJv ;
+            mv -fv zig-linux-x86_64-0.11.0 ${HOME}/.zig                                     ;
+            export ZIG_VERSION=`${HOME}/.zig/zig version`                                   ;
+            echo "Installed ${ZIG_VERSION} version of zig."                                 ;
+          }
+      # set zig job outputs
+      - id: home
+        run: echo "ZIG_HOME=$HOME/.zig" >> $GITHUB_OUTPUT
+      - id: bin
+        run: echo "ZIG_BIN=$ZIG_HOME" >> $GITHUB_OUTPUT
+#Usage:
+#name: ...
+#on: [...]
+#jobs:
+#  zig:
+#    uses: ./.github/workflows/zig.yml
+#  job1:
+#    runs-on: ubuntu-latest
+#    needs: zig                                                                   # <--- (1)
+#    steps:
+#      - uses: actions/checkout@v4
+#      - PATH="${{ needs.zig.outputs.ZIG_BIN }}:$PATH" run: zig version           # <--- (2)
+#  job2:
+#    runs-on: ubuntu-latest
+#    needs: zig                                                                   # <--- (1)
+#    steps:
+#      - uses: actions/checkout@v4
+#      - run: echo "${{ needs.zig.outputs.ZIG_BIN }}" >> "$GITHUB_PATH"           # <--- (2)
+#      - run: zig version
+#  job3:
+#    runs-on: ubuntu-latest
+#    needs: zig                                                                   # <--- (1)
+#    steps:
+#      - uses: actions/checkout@v4
+#      - run: echo "PATH=${{ needs.zig.outputs.ZIG_BIN }}:$PATH" >> "$GITHUB_ENV" # <--- (2)
+#      - run: zig version

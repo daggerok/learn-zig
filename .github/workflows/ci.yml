@@ -1,0 +1,27 @@
+name: CI
+on:
+  push: 
+  workflow_dispatch:
+jobs:
+  # Reusable zig env:
+  zig:
+    uses: ./.github/workflows/zig.yml
+  # # Testing job:
+  # tests:
+  #   needs: zig
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 1
+  #     - uses: actions/cache@v4
+  #       id: ci
+  #       with:
+  #         path: |
+  #           !~/.m2
+  #           ~/.zig
+  #         key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
+  #     - run: echo "${{ needs.zig.outputs.ZIG_BIN }}" >> "$GITHUB_PATH"
+  #     - run: zig version
+  #     - run: cd zig-01-hello && zig build --summary all
+  #     - run: cd zig-01-hello && ./zig-out/hello
