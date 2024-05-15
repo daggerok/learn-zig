@@ -20,7 +20,7 @@ jobs:
             ~/.zig
             ~/.local
             ~/.cache/zig
-          key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
+          key: ${{ hashFiles('**/workflows/*.yml') }}
       - run: zig version
   zig-01-hello:
     needs: zig                         # <--- (2) needs of job zig is required
@@ -35,7 +35,7 @@ jobs:
             ~/.zig
             ~/.local
             ~/.cache/zig
-          key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
+          key: ${{ hashFiles('zig-01-hello/**/*.zig') }}
       - run: cd zig-01-hello ; zig build --summary all
       - run: cd zig-01-hello ; ./zig-out/bin/hello
   zig-02-init:
@@ -51,10 +51,28 @@ jobs:
             ~/.zig
             ~/.local
             ~/.cache/zig
-          key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
+          key: ${{ hashFiles('zig-02-init/**/*.zig') }}
       - run: cd zig-02-init ; zig build --summary all
       - run: cd zig-02-init ; ./zig-out/bin/*
       - run: cd zig-02-init ; zig build test
       - run: cd zig-02-init ; zig test src/main.zig
       - run: cd zig-02-init ; zig test src/root.zig
-  
+  zig-03-print:
+    needs: zig
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.zig
+            ~/.local
+            ~/.cache/zig
+          key: ${{ hashFiles('zig-03-print/**/*.zig') }}
+      - run: cd zig-03-print ; zig build --summary all
+      - run: cd zig-03-print ; ./zig-out/bin/*
+      - run: cd zig-03-print ; zig build test
+      - run: cd zig-03-print ; zig test src/main.zig
+      - run: cd zig-03-print ; zig test src/root.zig
