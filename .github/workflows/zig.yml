@@ -25,21 +25,44 @@ jobs:
             ~/.zig
             ~/.local
             ~/.cache/zig
-          key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
+          key: ${{ hashFiles('**/workflows/*.yml') }}
       - run: |
-          PATH="$HOME/.zig:$PATH" command -v zig >/dev/null 2>&1 || {
-            echo >&2 "Zig is required but not installed."                                   ;
-            #sudo apt install curl tar xz-utils -yqq                                        ;
-            curl -fsSL https://ziglang.org/builds/zig-linux-x86_64-0.11.0.tar.xz | tar -xJv ;
-            mv -fv zig-linux-x86_64-0.11.0 ${HOME}/.zig                                     ;
-            mkdir -p ~/.local/bin ; ln -sv ~/.zig/zig ~/.local/bin/zig                      ;
-            export ZIG_VERSION=`${HOME}/.zig/zig version`                                   ;
-            echo "Installed ${ZIG_VERSION} version of zig."                                 ;
+          PATH="$HOME/.local/zig:$PATH" command -v zig >/dev/null 2>&1 || {
+            echo >&2 "Zig is required but not installed."                                     ;
+            echo >&2 "sudo apt install -yqq curl tar xz-utils"                                ;
+            sudo apt install -yqq curl tar xz-utils                                           ;
+            if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ "$(uname -m)" == "arm64" ]] ; then
+              export ZIG_DISTRIBUTION="zig-linux-aarch64-0.14.0-dev.2851+b074fb7dd"           ;
+              echo >&2 "export ZIG_DISTRIBUTION=$ZIG_DISTRIBUTION"                            ;
+            elif [[ "$OSTYPE" == "linux-gnu"* ]] ; then
+              export ZIG_DISTRIBUTION="zig-linux-x86_64-0.14.0-dev.2851+b074fb7dd"            ;
+              echo >&2 "export ZIG_DISTRIBUTION=$ZIG_DISTRIBUTION"                            ;
+            elif [[ "$OSTYPE" == "darwin"* ]] && [[ "$(uname -m)" == "arm64" ]] ; then
+              export ZIG_DISTRIBUTION="zig-macos-aarch64-0.14.0-dev.2851+b074fb7dd"           ;
+              echo >&2 "export ZIG_DISTRIBUTION=$ZIG_DISTRIBUTION"                            ;
+            elif [[ "$OSTYPE" == "darwin"* ]] ; then
+              export ZIG_DISTRIBUTION="zig-macos-x86_64-0.14.0-dev.2851+b074fb7dd"            ;
+              echo >&2 "export ZIG_DISTRIBUTION=$ZIG_DISTRIBUTION"                            ;
+            fi                                                                                ;
+            export ZIG_URL="https://ziglang.org/builds/${ZIG_DISTRIBUTION}.tar.xz"            ;
+            echo >&2 "ZIG_URL=${ZIG_URL}"                                                     ;
+            export ZIG_HOME="$HOME/.local/zig"                                                ;
+            echo >&2 "export ZIG_HOME=${ZIG_HOME}"                                            ;
+            echo >&2 "mkdir -pv ~/.local/bin ${ZIG_HOME}"                                     ;
+            # test ! -d ~/.local/zig || mv -fv ~/.local/zig ~/.local/zig-$(date +%Y-%m-%d-%H-%M-%S) ;
+            mkdir -pv ~/.local/bin "${ZIG_HOME}"                                              ;
+            echo >&2 "curl -LSs ${ZIG_URL} | tar -xJ -C "${ZIG_HOME}" --strip-components=1"   ;
+            curl -LSs ${ZIG_URL} | tar -xJ -C "${ZIG_HOME}" --strip-components=1              ;
+            echo >&2 "ln -sv ${ZIG_HOME}/zig ~/.local/bin/zig"                                ;
+            ln -sv "${ZIG_HOME}/zig" ~/.local/bin/zig                                         ; 
+            export ZIG_VERSION=`${ZIG_HOME}/zig version`               ;
+            echo >&2 "export ZIG_VERSION=${ZIG_VERSION}"                                      ;
+            echo "Installed ${ZIG_VERSION} version of zig."                                   ;
           }
-          ${HOME}/.zig/zig env
+          ${HOME}/.local/zig/zig env
       # set zig job outputs
       - id: bin
-        run: echo "ZIG_BIN=${HOME}/.zig" >> $GITHUB_OUTPUT
+        run: echo "ZIG_BIN=${HOME}/.local/zig" >> $GITHUB_OUTPUT
 #Usage:
 #name: ...
 #on: [...]
@@ -57,5 +80,5 @@ jobs:
 #            ~/.zig
 #            ~/.local
 #            ~/.cache/zig
-#          key: ${{ runner.os }}-${{ hashFiles('**/workflows/*.yml') }}
+#          key: ${{ hashFiles('**/workflows/*.yml') }}
 #      - run: zig version
