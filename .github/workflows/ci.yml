@@ -76,3 +76,23 @@ jobs:
       - run: cd zig-03-print ; zig build test
       - run: cd zig-03-print ; zig test src/main.zig
       - run: cd zig-03-print ; zig test src/root.zig
+  zig-2025-01-22-basics:
+    needs: zig
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.zig
+            ~/.local
+            ~/.cache/zig
+          key: ${{ hashFiles('**/workflows/*.yml') }}
+      - run: cd zig-2025-01-22-basics ; zig test src/root.zig
+      - run: cd zig-2025-01-22-basics ; zig test src/main.zig
+      - run: cd zig-2025-01-22-basics ; zig run src/main.zig
+      - run: cd zig-2025-01-22-basics ; zig build test
+      - run: cd zig-2025-01-22-basics ; zig build --summary all
+      - run: cd zig-2025-01-22-basics ; ./zig-out/bin/*
